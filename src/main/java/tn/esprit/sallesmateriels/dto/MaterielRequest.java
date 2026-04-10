@@ -6,6 +6,10 @@ package tn.esprit.sallesmateriels.dto;
 public class MaterielRequest {
     private String nom;
     private String status;
+    private Double dureeUtilisation;
+    private Double seuilMaintenance;
+    private Integer quantiteTotale;
+    private Integer quantiteAssociee;
 
     public MaterielRequest() {
     }
@@ -24,5 +28,37 @@ public class MaterielRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getDureeUtilisation() {
+        return dureeUtilisation;
+    }
+
+    public void setDureeUtilisation(Double dureeUtilisation) {
+        this.dureeUtilisation = dureeUtilisation;
+    }
+
+    public Double getSeuilMaintenance() {
+        return seuilMaintenance;
+    }
+
+    public void setSeuilMaintenance(Double seuilMaintenance) {
+        this.seuilMaintenance = seuilMaintenance;
+    }
+
+    public Integer getQuantiteTotale() {
+        return quantiteTotale;
+    }
+
+    public void setQuantiteTotale(Integer quantiteTotale) {
+        this.quantiteTotale = quantiteTotale;
+    }
+
+    public Integer getQuantiteAssociee() {
+        return quantiteAssociee;
+    }
+
+    public void setQuantiteAssociee(Integer quantiteAssociee) {
+        this.quantiteAssociee = quantiteAssociee;
     }
 }

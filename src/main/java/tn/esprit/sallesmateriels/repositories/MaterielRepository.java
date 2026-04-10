@@ -20,4 +20,6 @@ public interface MaterielRepository extends JpaRepository<Materiel, Integer> {
     @Modifying(clearAutomatically = true)
     @Query(value = "DELETE FROM materiel WHERE id = :id", nativeQuery = true)
     void deleteByIdNative(@Param("id") Integer id);
+
+    java.util.List<Materiel> findBySalleId(Integer salleId);
 }
