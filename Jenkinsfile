@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USER    = 'mohamedmalekchourabi'
         IMAGE_NAME         = 'salles-materiels'
-        DOCKER_CREDENTIALS = 'dockerhub-credentials'
         SONAR_TOKEN        = credentials('sonar-token')
         SONAR_HOST_URL     = 'http://sonarqube:9000'
     }
@@ -46,40 +44,11 @@ pipeline {
             }
         }
 
-        stage('🐳 Docker Build') {
-            steps {
-                sh "docker build -t ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} ."
-                sh "docker tag ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
-            }
-        }
-
-        stage('📤 Docker Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: "${DOCKER_CREDENTIALS}",
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh '''
-                        echo $PASS | docker login -u $USER --password-stdin
-                    '''
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
-                }
-            }
-        }
-
-        stage('🧹 Cleanup') {
-            steps {
-                sh "docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} || true"
-                sh "docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest || true"
-            }
-        }
     }
 
     post {
         success {
-            echo '🎉 Pipeline terminé avec succès !'
+            echo '🎉 Pipeline CI terminé avec succès !'
         }
         failure {
             echo '❌ Pipeline échoué. Vérifiez les logs.'
