@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USER    = 'melek'
+        DOCKER_HUB_USER    = 'mohamedmalekchourabi'
         IMAGE_NAME         = 'salles-materiels'
         DOCKER_CREDENTIALS = 'dockerhub-credentials'
         SONAR_TOKEN        = credentials('sonar-token')
