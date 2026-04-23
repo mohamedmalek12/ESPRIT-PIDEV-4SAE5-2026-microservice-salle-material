@@ -60,7 +60,9 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh '''
+                        echo $PASS | docker login -u $USER --password-stdin
+                    '''
                     sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}"
                     sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
                 }
