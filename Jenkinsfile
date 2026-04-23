@@ -7,7 +7,7 @@ pipeline {
         IMAGE_NAME         = 'nom-de-votre-microservice'
         DOCKER_CREDENTIALS = 'dockerhub-credentials'   // ID dans Jenkins Credentials
         SONAR_TOKEN        = credentials('sonar-token') // ID dans Jenkins Credentials
-        SONAR_HOST_URL     = 'http://localhost:9000'
+        SONAR_HOST_URL = 'http://sonarqube:9000'
     }
 
     tools {
