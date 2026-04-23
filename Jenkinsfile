@@ -2,17 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // 🔧 À adapter avec vos valeurs
-        DOCKER_HUB_USER    = 'votre-dockerhub-username'
-        IMAGE_NAME         = 'nom-de-votre-microservice'
-        DOCKER_CREDENTIALS = 'dockerhub-credentials'   // ID dans Jenkins Credentials
-        SONAR_TOKEN        = credentials('sonar-token') // ID dans Jenkins Credentials
-        SONAR_HOST_URL = 'http://sonarqube:9000'
+        DOCKER_HUB_USER    = 'melek'
+        IMAGE_NAME         = 'salles-materiels'
+        DOCKER_CREDENTIALS = 'dockerhub-credentials'
+        SONAR_TOKEN        = credentials('sonar-token')
+        SONAR_HOST_URL     = 'http://sonarqube:9000'
     }
 
     tools {
-        maven 'Maven-3.9'   // Nom configuré dans Jenkins Global Tools
-        jdk   'JDK-17'      // Nom configuré dans Jenkins Global Tools
+        maven 'Maven-3.9'
+        jdk   'JDK-17'
     }
 
     stages {
@@ -20,7 +19,7 @@ pipeline {
         stage('📥 Checkout') {
             steps {
                 checkout scm
-                echo "✅ Code récupéré depuis : ${env.GIT_URL}"
+                echo "✅ Code récupéré"
             }
         }
 
@@ -37,13 +36,13 @@ pipeline {
 
         stage('🔍 SonarQube Analysis') {
             steps {
-                sh """
-                    mvn sonar:sonar \
-                        -Dsonar.projectKey=${IMAGE_NAME} \
-                        -Dsonar.projectName=${IMAGE_NAME} \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.token=${SONAR_TOKEN}
-                """
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        mvn sonar:sonar \
+                            -Dsonar.projectKey=${IMAGE_NAME} \
+                            -Dsonar.projectName=${IMAGE_NAME}
+                    """
+                }
             }
         }
 
