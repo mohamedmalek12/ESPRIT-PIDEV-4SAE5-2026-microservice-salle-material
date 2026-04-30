@@ -59,7 +59,6 @@ class MaterielUsageRpcListenerTest {
 
     @Test
     void testUtilityMethods_Coverage() {
-        // On envoie des lettres au lieu de chiffres pour passer dans les blocs catch (NumberFormatException)
         listener.handleMaterielUsage(Map.of("salleId", "ABC", "hours", "XYZ"));
         assertTrue(true);
     }
