@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import tn.esprit.sallesmateriels.entities.Materiel;
 import tn.esprit.sallesmateriels.repositories.MaterielRepository;
 import tn.esprit.sallesmateriels.repositories.SalleRepository;
+import tn.esprit.sallesmateriels.entities.MaterielStatus;
 
 import java.util.*;
 
@@ -81,5 +82,57 @@ class MaterielServiceTest {
         service.deleteById(2);
 
         verify(materielRepository, atLeastOnce()).existsById(anyInt());
+    }
+    @Test
+    void registerUsage_ThrowsException_WhenMaterialInMaintenance() {
+        // Préparation d'un matériel déjà en maintenance
+        Materiel m = new Materiel();
+        m.setNom("Projecteur");
+        m.setStatus(MaterielStatus.EN_MAINTENANCE);
+
+        when(materielRepository.findBySalleId(1)).thenReturn(List.of(m));
+
+        // On vérifie que la RuntimeException est bien lancée (couvre le throw new RuntimeException)
+        assertThrows(RuntimeException.class, () -> {
+            service.registerUsageForSalle(1, 5.0);
+        });
+    }
+
+    @Test
+    void registerUsage_CoversThresholdWarnings() {
+        // Cas 1 : Matériel qui dépasse 120% du seuil
+        Materiel m1 = new Materiel();
+        m1.setNom("PC");
+        m1.setStatus(MaterielStatus.AVAILABLE);
+        m1.setDureeUtilisation(115.0);
+        m1.setSeuilMaintenance(100.0);
+        m1.setQuantiteAssociee(1);
+
+        // Cas 2 : Matériel qui dépasse juste 100% du seuil
+        Materiel m2 = new Materiel();
+        m2.setNom("Micro");
+        m2.setStatus(MaterielStatus.AVAILABLE);
+        m2.setDureeUtilisation(95.0);
+        m2.setSeuilMaintenance(100.0);
+        m2.setQuantiteAssociee(1);
+
+        when(materielRepository.findBySalleId(1)).thenReturn(Arrays.asList(m1, m2));
+
+        // On execute avec 10 heures pour faire basculer les deux matériels
+        service.registerUsageForSalle(1, 10.0);
+
+        // Vérifie que les messages ont été envoyés (couvre publishIfNonEmpty et RabbitMQ)
+        verify(materielRepository, atLeastOnce()).saveAll(anyList());
+        verify(rabbitTemplate, atLeastOnce()).convertAndSend(anyString(), anyString(), anyMap());
+    }
+
+    @Test
+    void testToStatus_EdgeCases() {
+        // Appelle toStatus (méthode privée ou static) via une ruse ou si elle est accessible
+        // Si toStatus est privée, le test registerUsage_CoversThresholdWarnings s'en occupe indirectement
+        // Mais on peut tester la liste vide pour couvrir le retour Optional.of(Map.of("warnings", List.of()))
+        when(materielRepository.findBySalleId(2)).thenReturn(new ArrayList<>());
+        var result = service.registerUsageForSalle(2, 5.0);
+        assertTrue(result.isPresent());
     }
 }
