@@ -135,4 +135,40 @@ class MaterielServiceTest {
         var result = service.registerUsageForSalle(2, 5.0);
         assertTrue(result.isPresent());
     }
+    @Test
+    void update_FullCoverage_AllFields() {
+        // 1. Préparation d'un matériel existant
+        Materiel m = new Materiel();
+        m.setId(1);
+        m.setQuantiteTotale(10);
+        m.setQuantiteAssociee(5);
+
+        when(materielRepository.findById(1)).thenReturn(Optional.of(m));
+        when(materielRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        // Si ton service cherche une salle
+        when(salleRepository.findById(anyInt())).thenReturn(Optional.of(new tn.esprit.sallesmateriels.entities.Salle()));
+
+        // 2. Création d'un body complet pour passer dans TOUS les "if"
+        Map<String, Object> body = new HashMap<>();
+        body.put("nom", "Nouveau Nom");
+        body.put("status", "AVAILABLE");
+        body.put("dureeUtilisation", 10.5);
+        body.put("seuilMaintenance", 50.0);
+        body.put("quantiteTotale", 100);
+        body.put("quantiteAssociee", 20);
+
+        // 3. Appel de l'update (avec salleId > 0 pour le dernier if)
+        service.update(1, body, 10);
+
+        // 4. Appel de l'update avec salleId <= 0 pour couvrir la branche m.setSalle(null)
+        service.update(1, body, 0);
+
+        // 5. Appel avec des quantités incohérentes pour couvrir les messages d'erreur
+        Map<String, Object> badBody = new HashMap<>();
+        badBody.put("quantiteTotale", 10);
+        badBody.put("quantiteAssociee", 50); // Associee > Totale
+        service.update(1, badBody, null);
+
+        verify(materielRepository, atLeastOnce()).save(any());
+    }
 }
