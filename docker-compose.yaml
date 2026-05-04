@@ -1,9 +1,49 @@
+version: '3.8'
+
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq-salle
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - devops-net
+
+  db-salle:
+    image: mysql:8.0
+    container_name: db-salle
+    environment:
+      - MYSQL_DATABASE=salles_materiels
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes # Permet de ne pas mettre de mot de passe
+    ports:
+      - "3308:3306"
+    networks:
+      - devops-net
+
+  salle-materiel:
+    build: .
+    container_name: salle-materiel-app
+    ports:
+      - "8088:8088"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Permet au conteneur de voir ton PC (Eureka)
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db-salle:3306/salles_materiels?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      # On pointe vers l'adresse spéciale pour sortir du conteneur et atteindre ton Eureka local
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://host.docker.internal:8761/eureka/
+    depends_on:
+      - db-salle
+      - rabbitmq
+    networks:
+      - devops-net
+
+networks:
+  devops-net:
+    external: true
