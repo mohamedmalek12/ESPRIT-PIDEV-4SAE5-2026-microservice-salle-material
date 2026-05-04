@@ -44,6 +44,15 @@ pipeline {
                         }
                     }
                 }
+        stage('🐳 Docker Build') {
+                    steps {
+                        script {
+                            echo "Construction de l'image Docker..."
+                            // On utilise le nom d'image défini dans environment
+                            sh "docker build -t ${IMAGE_NAME}:latest ."
+                        }
+                    }
+                }
 
     }
 
